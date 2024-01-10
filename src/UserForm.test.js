@@ -15,34 +15,35 @@ test("it shows two inputs and a button", () => {
   expect(button).toBeInTheDocument();
 });
 
-test("it calls onUserAdd when the form is submitted", () => {
-  // not the best implementation:
+test("it calls onUserAdd when the form is submitted", async () => {
+  const mock = jest.fn();
 
-  const argList = [];
-  const callback = (...args) => {
-    argList.push(args);
-  };
   // try to render my componment
-  render(<UserForm onUserAdd={callback} />);
+  render(<UserForm onUserAdd={mock} />);
 
   // find the two inputs
-  const [nameInput, emailInput] = screen.getAllByRole("textbox");
+  const nameInput = screen.getByRole("textbox", {
+    name: /name/i,
+  });
+  const emailInput = screen.getByRole("textbox", {
+    name: /email/i,
+  });
 
   // simulate typing in a name
-  user.click(nameInput);
-  user.keyboard("jane");
+  await user.click(nameInput);
+  await user.keyboard("jane");
 
   // simulate typing in an email
-  user.click(emailInput);
-  user.keyboard("jane@email.com");
+  await user.click(emailInput);
+  await user.keyboard("jane@email.com");
 
   // find the button
   const button = screen.getByRole("button");
 
   // simulate clicking the button
-  user.click(button);
+  await user.click(button);
 
   // assertion to make sure "onUserAdd" gets called with email/name
-  expect(argList).toHaveLength(1);
-  expect(argList[0][0]).toEqual({ name: "jane", email: "jane@email.com" });
+  expect(mock).toHaveBeenCalled();
+  expect(mock).toHaveBeenCalledWith({ name: "jane", email: "jane@email.com" });
 });
